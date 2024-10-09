@@ -1,0 +1,249 @@
+-- Create Complaint Officer Table
+CREATE TABLE Complaint_Officer (
+    CO_ID INT NOT NULL,
+    CO_Name VARCHAR(50) NOT NULL,
+    Email VARCHAR(50) NOT NULL,
+    Account_Type VARCHAR(50) NOT NULL,
+    Password VARCHAR(20) NOT NULL,
+    CONSTRAINT PK_Complaint_Officer PRIMARY KEY (CO_ID),
+    CONSTRAINT CHK_Email_CO CHECK (Email LIKE '%@%._%')
+);
+
+-- Create Customer Support Agent Table
+CREATE TABLE Customer_Support_Agent (
+    CS_ID INT NOT NULL,
+    First_Name VARCHAR(30) NOT NULL,
+    Last_Name VARCHAR(30) NOT NULL,
+    Email VARCHAR(50) NOT NULL,
+    Account_Type VARCHAR(50) NOT NULL,
+    Password VARCHAR(20) NOT NULL,
+    CONSTRAINT PK_CS_ID PRIMARY KEY (CS_ID),
+    CONSTRAINT CHK_Email_CS CHECK (Email LIKE '%@%._%')
+);
+
+-- Create Admin Table
+CREATE TABLE Admin (
+    Admin_ID INT NOT NULL,
+    Admin_Name VARCHAR(50) NOT NULL,
+    Password VARCHAR(20) NOT NULL,
+    Email VARCHAR(50) NOT NULL,
+    CONSTRAINT PK_Admin PRIMARY KEY (Admin_ID),
+    CONSTRAINT CHK_Email_Admin CHECK (Email LIKE '%@%._%')
+);
+
+-- Create Seller Table
+CREATE TABLE Seller (
+    Seller_ID INT NOT NULL,
+    First_Name VARCHAR(30) NOT NULL,
+    Last_Name VARCHAR(30) NOT NULL,
+    Email VARCHAR(50) NOT NULL,
+    Address VARCHAR(255) NOT NULL,
+    Password VARCHAR(20) NOT NULL,
+    Account_Type VARCHAR(50) NOT NULL,
+    CO_ID INT NOT NULL,
+    CS_ID INT NOT NULL,
+    CONSTRAINT PK_Seller PRIMARY KEY (Seller_ID),
+    CONSTRAINT CHK_Email_Seller CHECK (Email LIKE '%@%._%'),
+    CONSTRAINT FK_Seller_CO FOREIGN KEY (CO_ID) REFERENCES Complaint_Officer(CO_ID),
+    CONSTRAINT FK_Seller_CS FOREIGN KEY (CS_ID) REFERENCES Customer_Support_Agent(CS_ID)
+);
+
+-- Create Seller Phone Number Table
+CREATE TABLE Seller_Phone_No (
+    Seller_ID INT NOT NULL,
+    Phone_No VARCHAR(15) NOT NULL,
+    CONSTRAINT PK_Seller_Phone_No PRIMARY KEY (Seller_ID, Phone_No),
+    CONSTRAINT FK_Seller_Phone_No FOREIGN KEY (Seller_ID) REFERENCES Seller(Seller_ID)
+);
+
+-- Create Product Table
+CREATE TABLE Product (
+    Product_ID INT NOT NULL,
+    Product_Name VARCHAR(100) NOT NULL,
+    Description TEXT NOT NULL,
+    Product_Image VARCHAR(255) NOT NULL,
+    Starting_Price DECIMAL(10, 2) NOT NULL,
+    Admin_ID INT NOT NULL,
+    CONSTRAINT PK_Product PRIMARY KEY (Product_ID),
+    CONSTRAINT FK_Product_Admin FOREIGN KEY (Admin_ID) REFERENCES Admin(Admin_ID)
+);
+
+-- Create Seller_Product Table
+CREATE TABLE Seller_Product (
+    Seller_ID INT NOT NULL,
+    Product_ID INT NOT NULL,
+    CONSTRAINT PK_Seller_Product PRIMARY KEY (Seller_ID, Product_ID),
+    CONSTRAINT FK_Seller_Product_Seller FOREIGN KEY (Seller_ID) REFERENCES Seller(Seller_ID),
+    CONSTRAINT FK_Seller_Product_Product FOREIGN KEY (Product_ID) REFERENCES Product(Product_ID)
+);
+
+-- Create Bid Table
+CREATE TABLE Bid (
+    Bid_ID INT NOT NULL,
+    Bid_Name VARCHAR(100) NOT NULL,
+    Description TEXT NOT NULL,
+    Bid_Image VARCHAR(255) NOT NULL,
+    Starting_Price DECIMAL(10, 2) NOT NULL,
+    Time_Duration INT NOT NULL,
+    Admin_ID INT NOT NULL,
+    CONSTRAINT PK_Bid PRIMARY KEY (Bid_ID),
+    CONSTRAINT FK_Bid_Admin FOREIGN KEY (Admin_ID) REFERENCES Admin(Admin_ID)
+);
+
+-- Create Bid User Table
+CREATE TABLE Bid_User (
+    Bid_User_ID INT NOT NULL,
+    User_Name VARCHAR(100) NOT NULL,
+    New_User BIT NOT NULL,
+    Registered_User BIT NOT NULL,
+    Password VARCHAR(20) NOT NULL,
+    Address VARCHAR(255) NOT NULL,
+    CO_ID INT NOT NULL,
+    CS_ID INT NOT NULL,
+    CONSTRAINT PK_Bid_User PRIMARY KEY (Bid_User_ID),
+    CONSTRAINT FK_Bid_User_CO FOREIGN KEY (CO_ID) REFERENCES Complaint_Officer(CO_ID),
+    CONSTRAINT FK_Bid_User_CS FOREIGN KEY (CS_ID) REFERENCES Customer_Support_Agent(CS_ID)
+);
+
+-- Create Bid User Email Table
+CREATE TABLE Bid_User_Email (
+    Bid_User_ID INT NOT NULL,
+    Email VARCHAR(50) NOT NULL,
+    CONSTRAINT PK_Bid_User_Email PRIMARY KEY (Bid_User_ID),
+    CONSTRAINT CHK_Email_Bid_User CHECK (Email LIKE '%@%._%'),
+    CONSTRAINT FK_Bid_User_Email FOREIGN KEY (Bid_User_ID) REFERENCES Bid_User(Bid_User_ID)
+);
+
+-- Create Bid_User_Bid Table
+CREATE TABLE Bid_User_Bid (
+    Bid_ID INT NOT NULL,
+    Bid_User_ID INT NOT NULL,
+    Bid_Amount DECIMAL(10, 2) NOT NULL,
+    Bid_Timestamp DATETIME NOT NULL,
+    CONSTRAINT PK_Bid_User_Bid PRIMARY KEY (Bid_ID, Bid_User_ID),
+    CONSTRAINT FK_Bid_User_Bid_User FOREIGN KEY (Bid_User_ID) REFERENCES Bid_User(Bid_User_ID),
+    CONSTRAINT FK_Bid_User_Bid_Bid FOREIGN KEY (Bid_ID) REFERENCES Bid(Bid_ID)
+);
+
+-- Create Payment Table
+CREATE TABLE Payment (
+    Payment_ID INT NOT NULL,
+    Amount DECIMAL(10, 2) NOT NULL,
+    Bid_User_ID INT NOT NULL,
+    Bid_ID INT NOT NULL,
+    Seller_ID INT NOT NULL,
+    CS_ID INT NOT NULL,
+    CONSTRAINT PK_Payment PRIMARY KEY (Payment_ID),
+    CONSTRAINT FK_Payment_Bid_User FOREIGN KEY (Bid_User_ID) REFERENCES Bid_User(Bid_User_ID),
+    CONSTRAINT FK_Payment_Bid FOREIGN KEY (Bid_ID) REFERENCES Bid(Bid_ID),
+    CONSTRAINT FK_Payment_Seller FOREIGN KEY (Seller_ID) REFERENCES Seller(Seller_ID),
+    CONSTRAINT FK_Payment_CS FOREIGN KEY (CS_ID) REFERENCES Customer_Support_Agent(CS_ID)
+);
+
+-- Sample Data for Complaint Officer Table
+INSERT INTO Complaint_Officer (CO_ID, CO_Name, Email, Account_Type, Password) VALUES
+(1, 'Anura Liyanage', 'anura.liyanage@example.com', 'Support Agent', 'pass123456'),
+(2, 'Nimali Dissanayake', 'nimali.dissanayake@example.com', 'Support Agent', 'pass654321'),
+(3, 'Ajith Gunaratne', 'ajith.gunaratne@example.com', 'Support Agent', 'pass789012'),
+(4, 'Chathura Perera', 'chathura.perera@example.com', 'Support Agent', 'pass321654'),
+(5, 'Malsha Fernando', 'malsha.fernando@example.com', 'Support Agent', 'pass987654'),
+(6, 'Sahan Kumara', 'sahan.kumara@example.com', 'Support Agent', 'pass456789');
+
+-- Sample Data for Customer Support Agent Table
+INSERT INTO Customer_Support_Agent (CS_ID, First_Name, Last_Name, Email, Account_Type, Password) VALUES
+(1, 'Lakshitha', 'Amarasinghe', 'lakshitha.amarasinghe@example.com', 'Support Agent', 'support123'),
+(2, 'Thilina', 'Perera', 'thilina.perera@example.com', 'Support Agent', 'support456'),
+(3, 'Sasika', 'Nayak', 'sasika.nayak@example.com', 'Support Agent', 'support789'),
+(4, 'Piumi', 'Sampath', 'piumi.sampath@example.com', 'Support Agent', 'support321'),
+(5, 'Yashoda', 'Rajapakse', 'yashoda.rajapakse@example.com', 'Support Agent', 'support654'),
+(6, 'Sanduni', 'Kumari', 'sanduni.kumari@example.com', 'Support Agent', 'support987');
+
+-- Sample Data for Admin Table
+INSERT INTO Admin (Admin_ID, Admin_Name, Password, Email) VALUES
+(1, 'Namal Perera', 'admin123', 'namal.perera@example.com'),
+(2, 'Shanika Fernando', 'admin456', 'shanika.fernando@example.com'),
+(3, 'Kamal Rajapaksha', 'admin789', 'kamal.rajapaksha@example.com'),
+(4, 'Dilani Wijesekara', 'admin321', 'dilani.wijesekara@example.com'),
+(5, 'Suresh Kumar', 'admin654', 'suresh.kumar@example.com'),
+(6, 'Priya Jayawardena', 'admin987', 'priya.jayawardena@example.com');
+
+-- Sample Data for Seller Table
+INSERT INTO Seller (Seller_ID, First_Name, Last_Name, Email, Address, Password, Account_Type, CO_ID, CS_ID) VALUES
+(1, 'Ramesh', 'Sampath', 'ramesh.sampath@example.com', 'Colombo 7, Sri Lanka', 'password123', 'Business', 1, 1),
+(2, 'Nisha', 'Jayasinghe', 'nisha.jayasinghe@example.com', 'Kandy, Sri Lanka', 'password456', 'Individual', 2, 2),
+(3, 'Ravi', 'Perera', 'ravi.perera@example.com', 'Galle, Sri Lanka', 'password789', 'Individual', 3, 3),
+(4, 'Sakuni', 'Karunaratne', 'sakuni.karunaratne@example.com', 'Jaffna, Sri Lanka', 'password321', 'Business', 4, 4),
+(5, 'Hiruni', 'Rajapakse', 'hiruni.rajapakase@example.com', 'Matara, Sri Lanka', 'password654', 'Individual', 5, 5),
+(6, 'Tissa', 'Fernando', 'tissa.fernando@example.com', 'Negombo, Sri Lanka', 'password987', 'Business', 6, 6);
+
+-- Sample Data for Seller Phone Number Table
+INSERT INTO Seller_Phone_No (Seller_ID, Phone_No) VALUES
+(1, '0771234567'),
+(1, '0777654321'),
+(2, '0781234567'),
+(2, '0787654321'),
+(3, '0761234567'),
+(4, '0751234567');
+
+-- Sample Data for Product Table
+INSERT INTO Product (Product_ID, Product_Name, Description, Product_Image, Starting_Price, Admin_ID) VALUES
+(1, 'Handmade Pot', 'Beautiful handmade clay pot', 'image1.jpg', 1500.00, 1),
+(2, 'Wooden Table', 'Elegant wooden dining table', 'image2.jpg', 25000.00, 2),
+(3, 'Ceramic Plate', 'Stylish ceramic plate', 'image3.jpg', 1000.00, 1),
+(4, 'Cotton Shirt', 'Comfortable cotton shirt', 'image4.jpg', 2000.00, 3),
+(5, 'Brass Lamp', 'Antique brass lamp', 'image5.jpg', 3500.00, 2),
+(6, 'Leather Bag', 'Genuine leather handbag', 'image6.jpg', 5000.00, 1);
+
+-- Sample Data for Seller_Product Table
+INSERT INTO Seller_Product (Seller_ID, Product_ID) VALUES
+(1, 1),
+(1, 3),
+(2, 2),
+(3, 4),
+(4, 5),
+(5, 6);
+
+-- Sample Data for Bid Table
+INSERT INTO Bid (Bid_ID, Bid_Name, Description, Bid_Image, Starting_Price, Time_Duration, Admin_ID) VALUES
+(1, 'Bid for Handmade Pot', 'Bid for a beautiful handmade pot', 'bid_image1.jpg', 1500.00, 7, 1),
+(2, 'Bid for Wooden Table', 'Bid for an elegant wooden table', 'bid_image2.jpg', 25000.00, 14, 2),
+(3, 'Bid for Ceramic Plate', 'Bid for a stylish ceramic plate', 'bid_image3.jpg', 1000.00, 5, 1),
+(4, 'Bid for Cotton Shirt', 'Bid for a comfortable cotton shirt', 'bid_image4.jpg', 2000.00, 10, 3),
+(5, 'Bid for Brass Lamp', 'Bid for an antique brass lamp', 'bid_image5.jpg', 3500.00, 7, 2),
+(6, 'Bid for Leather Bag', 'Bid for a genuine leather bag', 'bid_image6.jpg', 5000.00, 14, 1);
+
+-- Sample Data for Bid User Table
+INSERT INTO Bid_User (Bid_User_ID, User_Name, New_User, Registered_User, Password, Address, CO_ID, CS_ID) VALUES
+(1, 'Nimesh Weerakoon', 0, 1, 'userpass123', 'Colombo 3, Sri Lanka', 1, 1),
+(2, 'Anjali Seneviratne', 1, 0, 'userpass456', 'Kandy, Sri Lanka', 2, 2),
+(3, 'Kanishka Dissanayake', 0, 1, 'userpass789', 'Galle, Sri Lanka', 3, 3),
+(4, 'Chathura Samarasekara', 1, 0, 'userpass321', 'Jaffna, Sri Lanka', 4, 4),
+(5, 'Hiran Rathnayake', 0, 1, 'userpass654', 'Matara, Sri Lanka', 5, 5),
+(6, 'Priyanka Gunathilaka', 1, 0, 'userpass987', 'Negombo, Sri Lanka', 6, 6);
+
+-- Sample Data for Bid User Email Table
+INSERT INTO Bid_User_Email (Bid_User_ID, Email) VALUES
+(1, 'nimesh.weerakoon@example.com'),
+(2, 'anjali.seneviratne@example.com'),
+(3, 'kanishka.dissanayake@example.com'),
+(4, 'chathura.samarasekara@example.com'),
+(5, 'hiran.rathnayake@example.com'),
+(6, 'priyanka.gunathilaka@example.com');
+
+-- Sample Data for Bid_User_Bid Table
+INSERT INTO Bid_User_Bid (Bid_User_ID, Bid_ID, Bid_Amount, Bid_Timestamp) VALUES
+(1, 1, 1600.00, '2024-10-01 14:30:00'),
+(1, 3, 1100.00, '2024-10-02 09:45:00'),
+(2, 2, 26000.00, '2024-10-03 11:15:00'),
+(3, 4, 2100.00, '2024-10-04 08:30:00'),
+(4, 5, 3600.00, '2024-10-05 17:20:00'),
+(5, 6, 5200.00, '2024-10-06 19:10:00');
+
+-- Sample Data for Payment Table
+INSERT INTO Payment (Payment_ID, Amount, Bid_User_ID, Bid_ID, Seller_ID, CS_ID) VALUES
+(1, 1600.00, 1, 1, 1, 1),
+(2, 26000.00, 2, 2, 2, 2),
+(3, 1100.00, 1, 3, 1, 1),
+(4, 2100.00, 3, 4, 3, 2),
+(5, 3600.00, 4, 5, 4, 1),
+(6, 5200.00, 5, 6, 5, 2);
